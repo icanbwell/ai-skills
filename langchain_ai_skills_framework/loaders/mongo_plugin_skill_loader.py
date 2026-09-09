@@ -22,6 +22,9 @@ from motor.motor_asyncio import AsyncIOMotorCollection, AsyncIOMotorDatabase
 from pymongo import ReturnDocument
 from pymongo.errors import OperationFailure
 
+from langchain_ai_skills_framework.loaders.exceptions.skill_loader_error import (
+    SkillLoaderError,
+)
 from langchain_ai_skills_framework.loaders.exceptions.skill_not_found_error import (
     SkillNotFoundError,
 )
@@ -856,7 +859,8 @@ class MongoPluginSkillLoader:
             upsert=True,
             return_document=ReturnDocument.AFTER,
         )
-        assert raw is not None
+        if raw is None:
+            raise SkillLoaderError(f"save_plugin: upsert returned no document for plugin '{plugin_name}'")
         return MongoPluginDefinitionDocument.from_mongo_dict(raw)
 
     async def plugin_exists(self, *, plugin_name: str) -> bool:

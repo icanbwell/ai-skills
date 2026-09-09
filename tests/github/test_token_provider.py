@@ -2,40 +2,28 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+
 from langchain_ai_skills_framework.github import (
     GitHubAppTokenProvider,
     GitHubTokenProvider,
     StaticTokenProvider,
 )
 
-TEST_RSA_PRIVATE_KEY = """-----BEGIN PRIVATE KEY-----
-MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCiXezK95eGIz2E
-ABM/WkTMjOqDwgckThvmvG6SiiH0+zaCzdEIVJXlHuqRgpMB/v9tdJXdfYSZSl1Q
-+GDen/bDZUxbQGbaqlWzRS4cfhF5FVjQvL/Big3mGBpobxGikuzE/aDRT4Uc1itA
-aoJxh+1aBnoXm/mQtCj3G9h0GN4QpLjO55tNpOmtbNaBq0CB37IoQwas4RhccDRy
-l91EW7VNodNENZBHZZrgdOFGmVr3RYFewM9VUGPYlpoJrQL4+2gad51YcdE6bE/E
-/GYsiWTYAcunzswijG8P0z915O9Zqgyt938xFxaRLHlaE4cHY0Y0gDAsyd6YeF7M
-Mh0zDS7lAgMBAAECggEAEb9ZgDADCH72nOSTNgQMbB1lDuTY+f9trlFfdrYRkyEY
-asDLffEc90/jTOdsYTX5voGVVgH/ye+mdpDHqd3rT51VdM370B/5QSCpMyUWjNkn
-/Zz8CtAnx8RPsqWdVFth9QBSIT7jam0Aikh6HKXCbGoz0zvR0h7XMXeCN+J193SV
-LAUDYdtDVH1GfyYBVhqGHkVFvgVkTvo/sj5yeuNgogySoM9G2iShLSgpXv+Ov+vf
-sXOcwMqPTKtV7yv/cbs0p2+ZN515TKGhjiH0OFWau6pGF3rMLvMKz0oLdULfB/ZH
-8FAYgoSaqt60JvnQ8VFRh1n0r88eJ1iPIn2vJz2MYQKBgQDbbHIyxH/98owpOmSZ
-a6womyho36JvJcUqqj0DUkJABvglrVj2qMPQl/sJMiv93H8I/FWvkUtt3L1UhtSW
-4Ckp+Scb5wwe/QtZO0FHcnLAsyuyXkb01tUIjFaQ5rKNh+0BTMoQ44QvEAExAyJJ
-OyIoJpSxzlj0teoqOwM9P0ZZEQKBgQC9bqyJJm8oPblQOQRX/1pJLce5gUyocysY
-M+GtkQsppFJHEJotdyAt9eBWAqIDTIjERxGmXxsGahwKuVQVxEfbOURU8W9iSv83
-aJpIgr0QjzlreP4x+AfjXao4MDuJwtM4/oHUWFy9GpdnOkPHPIw0q24XlKSN9BzL
-qQIS3KXYlQKBgQCGVdd4g1sE40iyOQC7+PKWjZ9ozXmJ6KrUWxMthF/xCRNFJeKw
-aFQx0cosMB5EtojDvJDNAvwWD62OIVnn4ObyvooWCBcgpbUb9S4bCtN8bHUVJ6jz
-Xs9gA2NAJS0tfwk34YZYXqJfmcHQ+uUzxlM8F5qzXOyTLQhmwGhUR/fOsQKBgQCW
-TdpYeEZ6h38iSBtKNzJMHib66b0Ja1gmPAQ004En6VnfSS0MJhlCXnVByZUDSRa7
-pig6+ftXe5oEaEhvfO4G48l0HJ1kQF2AeV7xacrZ+Mp2m+oVe9fGb+s/6gVTqWIv
-NsGM2w+6e/7lyTU+QKx+ngccbrSiba7raY5bqPdugQKBgQCbYdK0lFaACxifMWpL
-imtjciDVGTmxzJ1C1lgD+E3DNf5dlQCRSkHJunWYMLLq0E3xoXjEv+QFdQoxQEWf
-5utDJQO+XTkIDVKU+xJUxMGzZx5cACulrTVn9rh5H7eIsJazrqhEj4tCb2MXP3VX
-DdZviTUT6f/DbvH27tbG+47d/A==
------END PRIVATE KEY-----"""
+
+def _generate_test_rsa_private_key() -> str:
+    """Generate a throwaway RSA private key, PEM-encoded, for signing test JWTs only."""
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    pem = key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+    return pem.decode("utf-8")
+
+
+TEST_RSA_PRIVATE_KEY = _generate_test_rsa_private_key()
 
 
 class TestStaticTokenProvider:
