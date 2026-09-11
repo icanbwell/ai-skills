@@ -14,7 +14,10 @@ from types import MappingProxyType
 from typing import Any
 
 from langchain_ai_skills_framework.models.plugin_definition import PluginDefinition
-from langchain_ai_skills_framework.models.plugin_mcp_config import PluginMcpServerEntry
+from langchain_ai_skills_framework.models.plugin_mcp_config import (
+    PluginMcpServerEntry,
+    coerce_mcp_visibility,
+)
 from langchain_ai_skills_framework.models.skills_model import (
     SkillDetails,
     SkillSnapshot,
@@ -60,6 +63,7 @@ def _serialize_summary(*, summary: SkillSummary) -> dict[str, Any]:
         "compatibility": summary.compatibility,
         "metadata": dict(summary.metadata),
         "allowed_tools": list(summary.allowed_tools),
+        "required_external_servers": list(summary.required_external_servers),
     }
 
 
@@ -76,6 +80,7 @@ def _deserialize_summary(*, data: dict[str, Any]) -> SkillSummary:
         compatibility=data.get("compatibility"),
         metadata=metadata,
         allowed_tools=tuple(data.get("allowed_tools", [])),
+        required_external_servers=tuple(data.get("required_external_servers", [])),
     )
 
 
@@ -110,6 +115,7 @@ def _serialize_mcp_entry(*, entry: PluginMcpServerEntry) -> dict[str, Any]:
         "display_name": entry.display_name,
         "auth": entry.auth,
         "oauth": entry.oauth,
+        "visibility": entry.visibility,
     }
 
 
@@ -127,6 +133,7 @@ def _deserialize_mcp_entry(*, data: dict[str, Any]) -> PluginMcpServerEntry:
         display_name=data.get("display_name"),
         auth=data.get("auth"),
         oauth=data.get("oauth"),
+        visibility=coerce_mcp_visibility(data.get("visibility")),
     )
 
 

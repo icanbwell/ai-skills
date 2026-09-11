@@ -24,6 +24,11 @@ class SkillSummary:
     metadata: Mapping[str, object] = field(default_factory=dict)
     allowed_tools: tuple[str, ...] = ()
     date_modified: datetime | None = None
+    required_external_servers: tuple[str, ...] = ()
+    """``.mcp.json`` server keys (``PluginMcpServerEntry.server_key``) this skill
+    needs even though they're marked ``visibility="external"``. Empty (the
+    default) means the skill needs no external server — every existing skill's
+    current, unchanged behavior."""
 
 
 @dataclass(frozen=True, slots=True)

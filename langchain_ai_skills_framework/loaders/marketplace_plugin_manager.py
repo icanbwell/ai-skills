@@ -17,7 +17,10 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
-from langchain_ai_skills_framework.models.plugin_mcp_config import PluginMcpServerEntry
+from langchain_ai_skills_framework.models.plugin_mcp_config import (
+    PluginMcpServerEntry,
+    coerce_mcp_visibility,
+)
 from langchain_ai_skills_framework.utilities.skill_name_normalizer import normalize_skill_name
 
 logger = logging.getLogger(__name__)
@@ -139,6 +142,7 @@ class MarketplacePluginManager:
                 else None,
                 auth=server_config.get("auth") if isinstance(server_config.get("auth"), str) else None,
                 oauth=oauth_raw if isinstance(oauth_raw, dict) else None,
+                visibility=coerce_mcp_visibility(server_config.get("visibility")),
             )
 
             if not mcp_entry.is_http:

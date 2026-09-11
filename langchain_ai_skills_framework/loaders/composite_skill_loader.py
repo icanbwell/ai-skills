@@ -26,7 +26,10 @@ from langchain_ai_skills_framework.loaders.skill_loader_protocol import (
     SkillLoaderProtocol,
 )
 from langchain_ai_skills_framework.models.plugin_definition import PluginDefinition
-from langchain_ai_skills_framework.models.plugin_mcp_config import PluginMcpServerEntry
+from langchain_ai_skills_framework.models.plugin_mcp_config import (
+    PluginMcpServerEntry,
+    coerce_mcp_visibility,
+)
 from langchain_ai_skills_framework.models.skills_model import (
     SkillDetails,
     SkillSnapshot,
@@ -399,6 +402,7 @@ class CompositeSkillLoader(SkillLoaderProtocol):
                             display_name=mcp_dict.get("display_name"),
                             auth=mcp_dict.get("auth"),
                             oauth=mcp_dict.get("oauth"),
+                            visibility=coerce_mcp_visibility(mcp_dict.get("visibility")),
                         )
                     )
                 skill_summaries = tuple(
