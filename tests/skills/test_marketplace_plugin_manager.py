@@ -243,6 +243,53 @@ class TestReadMcpConfigs:
         assert configs[0].headers == {"X-Custom": "value"}
         assert configs[0].auth == "oauth2"
 
+    def test_defaults_to_internal_visibility_when_key_absent(
+        self, tmp_path: Path, manager: MarketplacePluginManager
+    ) -> None:
+        """Every existing .mcp.json (no "visibility" key) must keep resolving
+        to "internal" — pure opt-in, no migration required."""
+        mcp_config = {"mcpServers": {"my-server": {"url": "http://localhost:8080"}}}
+        (tmp_path / ".mcp.json").write_text(json.dumps(mcp_config))
+
+        entry = PluginEntry(name="test-plugin", path=tmp_path)
+        configs = manager.read_mcp_configs(entry)
+
+        assert configs[0].visibility == "internal"
+
+    def test_reads_explicit_external_visibility(self, tmp_path: Path, manager: MarketplacePluginManager) -> None:
+        mcp_config = {
+            "mcpServers": {
+                "partner-server": {
+                    "url": "http://partner.example.com/mcp",
+                    "visibility": "external",
+                }
+            }
+        }
+        (tmp_path / ".mcp.json").write_text(json.dumps(mcp_config))
+
+        entry = PluginEntry(name="test-plugin", path=tmp_path)
+        configs = manager.read_mcp_configs(entry)
+
+        assert configs[0].visibility == "external"
+
+    def test_unrecognized_visibility_value_defaults_to_internal(
+        self, tmp_path: Path, manager: MarketplacePluginManager
+    ) -> None:
+        mcp_config = {
+            "mcpServers": {
+                "my-server": {
+                    "url": "http://localhost:8080",
+                    "visibility": "not-a-real-tier",
+                }
+            }
+        }
+        (tmp_path / ".mcp.json").write_text(json.dumps(mcp_config))
+
+        entry = PluginEntry(name="test-plugin", path=tmp_path)
+        configs = manager.read_mcp_configs(entry)
+
+        assert configs[0].visibility == "internal"
+
 
 class TestCollectAllMcpConfigs:
     """Tests for batch collection across multiple plugins."""
