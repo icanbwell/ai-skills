@@ -16,7 +16,10 @@ from langchain_ai_skills_framework.loaders.exceptions.skill_not_found_error impo
     SkillNotFoundError,
 )
 from langchain_ai_skills_framework.models.plugin_definition import PluginDefinition
-from langchain_ai_skills_framework.models.plugin_mcp_config import PluginMcpServerEntry
+from langchain_ai_skills_framework.models.plugin_mcp_config import (
+    PluginMcpServerEntry,
+    coerce_mcp_visibility,
+)
 from langchain_ai_skills_framework.utilities.skill_name_normalizer import (
     normalize_skill_name,
 )
@@ -393,6 +396,7 @@ class CompositeSkillLoader(SkillLoaderProtocol):
                             display_name=mcp_dict.get("display_name"),
                             auth=mcp_dict.get("auth"),
                             oauth=mcp_dict.get("oauth"),
+                            visibility=coerce_mcp_visibility(mcp_dict.get("visibility")),
                         )
                     )
                 skill_summaries = tuple(

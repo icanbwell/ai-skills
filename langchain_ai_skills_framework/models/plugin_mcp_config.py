@@ -2,7 +2,28 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
+
+# Trust tier of an MCP server declared in a plugin's .mcp.json.
+#
+# "internal" (the default) means a b.well-owned server such as
+# "fhir-server". "external" marks a partner-owned server so different rules
+# can apply to it (e.g. withholding it from config discovery unless a skill
+# explicitly declares it needs the server). Purely additive — every
+# existing .mcp.json has no "visibility" key and keeps resolving to
+# "internal" unchanged.
+McpServerVisibility = Literal["internal", "external"]
+
+
+def coerce_mcp_visibility(value: object) -> McpServerVisibility:
+    """Coerce an arbitrary value (e.g. from JSON or MongoDB) to a known visibility.
+
+    Forward-compatible: anything other than the literal string ``"external"``
+    (missing, ``None``, or an unrecognized future value) resolves to
+    ``"internal"`` rather than raising, so old callers and unknown values
+    never break.
+    """
+    return "external" if value == "external" else "internal"
 
 
 @dataclass(frozen=True)
@@ -48,6 +69,10 @@ class PluginMcpServerEntry:
 
     oauth: dict[str, Any] | None = None
     """OAuth configuration dict (clientId, authServerMetadataUrl, etc.)."""
+
+    visibility: McpServerVisibility = "internal"
+    """Trust tier: "internal" (default, e.g. fhir-server) or "external"
+    (partner-owned). See :data:`McpServerVisibility`."""
 
     @property
     def namespaced_key(self) -> str:

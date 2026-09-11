@@ -74,7 +74,7 @@ class MongoPluginSkillDocument(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
-    SCHEMA_VERSION: ClassVar[int] = 2
+    SCHEMA_VERSION: ClassVar[int] = 3
 
     plugin_name: str = Field(description="Plugin that owns this skill")
     skill_name: str = Field(description="Normalized name of the skill")
@@ -85,6 +85,10 @@ class MongoPluginSkillDocument(BaseModel):
     allowed_tools: tuple[str, ...] = Field(
         default=(),
         description="Tool names this skill is allowed to use",
+    )
+    required_external_servers: tuple[str, ...] = Field(
+        default=(),
+        description="mcpServers keys from .mcp.json that this skill needs even though they're external",
     )
     metadata: dict[str, Any] | None = Field(
         default=None,
@@ -113,6 +117,7 @@ class MongoPluginSkillDocument(BaseModel):
     def to_mongo_dict(self) -> dict[str, Any]:
         data = self.model_dump()
         data["allowed_tools"] = list(self.allowed_tools)
+        data["required_external_servers"] = list(self.required_external_servers)
         return data
 
     @classmethod
